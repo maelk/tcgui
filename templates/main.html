@@ -34,12 +34,12 @@
             <tr>
                 <td>{{ rule['name'] }}</td>
                 <form method="POST" action="{{ url_for('modify_rule', interface=rule['name']) }}">
-                    <td><input type="text" name="Rate" size="5" value="{{ rule['rate'] }}"></td>
-                    <td><input type="text" name="Delay" size="5" value="{{ rule['delay'] }}"></td>
-                    <td><input type="text" name="Loss" size="5" value="{{ rule['loss'] }}"></td>
-                    <td><input type="text" name="Duplicate" size="5" value="{{ rule['duplicate'] }}"></td>
-                    <td><input type="text" name="Reorder" size="5" value="{{ rule['reorder'] }}"></td>
-                    <td><input type="text" name="Corrupt" size="5" value="{{ rule['corrupt'] }}"></td>
+                    <td><input type="text" name="Rate" size="7" value="{{ rule['rate'] }}"></td>
+                    <td><input type="text" name="Delay" size="7" value="{{ rule['delay'] }}"></td>
+                    <td><input type="text" name="Loss" size="7" value="{{ rule['loss'] }}"></td>
+                    <td><input type="text" name="Duplicate" size="7" value="{{ rule['duplicate'] }}"></td>
+                    <td><input type="text" name="Reorder" size="7" value="{{ rule['reorder'] }}"></td>
+                    <td><input type="text" name="Corrupt" size="7" value="{{ rule['corrupt'] }}"></td>
                     <td><input type="submit" value="Apply rule"></td>
                 </form>
                 <form method="POST" action="{{ url_for('remove_rule', interface= rule['name']) }}">
@@ -50,12 +50,12 @@
             <tr>
                 <td><b>All</b></td>
                 <form method="POST" action="{{ url_for('modify_rules') }}">
-                    <td><input type="text" name="Rate" size="5"></td>
-                    <td><input type="text" name="Delay" size="5"></td>
-                    <td><input type="text" name="Loss" size="5"></td>
-                    <td><input type="text" name="Duplicate" size="5"></td>
-                    <td><input type="text" name="Reorder" size="5"></td>
-                    <td><input type="text" name="Corrupt" size="5"></td>
+                    <td><input type="text" name="Rate" size="5" style="font-weight: bold;"></td>
+                    <td><input type="text" name="Delay" size="5" style="font-weight: bold;"></td>
+                    <td><input type="text" name="Loss" size="5" style="font-weight: bold;"></td>
+                    <td><input type="text" name="Duplicate" size="5" style="font-weight: bold;"></td>
+                    <td><input type="text" name="Reorder" size="5" style="font-weight: bold;"></td>
+                    <td><input type="text" name="Corrupt" size="5" style="font-weight: bold;"></td>
                     <td><input type="submit" value="Apply rules" style="font-weight: bold;"></td>
                 </form>
                 <form method="POST" action="{{ url_for('remove_rules') }}">

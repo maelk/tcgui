@@ -39,6 +39,8 @@ def add_rule(interface, delay, loss, duplicate, reorder, corrupt, rate):
     if duplicate != '':
         command += ' duplicate %s%%' % duplicate
     if reorder != '':
+        if delay == '':
+            return 'Reordering requires delay', 400
         command += ' reorder %s%%' % reorder
     if corrupt != '':
         command += ' corrupt %s%%' % corrupt
@@ -46,12 +48,23 @@ def add_rule(interface, delay, loss, duplicate, reorder, corrupt, rate):
     command = command.split(' ')
     proc = subprocess.Popen(command)
     proc.wait()
+    return redirect(url_for('main'))
     
 def del_rule(interface):
     command = 'tc qdisc del dev %s root netem' % interface
     command = command.split(' ')
     proc = subprocess.Popen(command)
     proc.wait()
+    
+def get_params():
+    params = {}
+    params['delay'] = request.form['Delay']
+    params['loss'] = request.form['Loss']
+    params['duplicate'] = request.form['Duplicate']
+    params['reorder'] = request.form['Reorder']
+    params['corrupt'] = request.form['Corrupt']
+    params['rate'] = request.form['Rate']
+    return params
     
 @app.route("/")
 def main():
@@ -61,14 +74,7 @@ def main():
 
 @app.route('/modify-rule/<interface>', methods=['POST'])
 def modify_rule(interface):
-    delay = request.form['Delay']
-    loss = request.form['Loss']
-    duplicate = request.form['Duplicate']
-    reorder = request.form['Reorder']
-    corrupt = request.form['Corrupt']
-    rate = request.form['Rate']
-    add_rule(interface, delay, loss, duplicate, reorder, corrupt, rate)
-    return redirect(url_for('main'))
+    return add_rule(interface, **get_params())
 
 @app.route('/delete-rule/<interface>', methods=['POST'])
 def remove_rule(interface):
@@ -78,14 +84,11 @@ def remove_rule(interface):
     
 @app.route('/modify-rules', methods=['POST'])
 def modify_rules():
-    delay = request.form['Delay']
-    loss = request.form['Loss']
-    duplicate = request.form['Duplicate']
-    reorder = request.form['Reorder']
-    corrupt = request.form['Corrupt']
-    rate = request.form['Rate']
+    params = get_params()
+    if params['reorder'] != '' and params['delay'] == '' :
+        return 'Reordering requires delay', 400
     for rule in get_active_rules():
-        add_rule(rule['name'], delay, loss, duplicate, reorder, corrupt, rate)
+        add_rule(rule['name'], **params)
     return redirect(url_for('main'))
     
 @app.route('/delete-rules', methods=['POST'])
