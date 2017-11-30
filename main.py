@@ -14,7 +14,7 @@ def parse_arguments():
                         help='The port where the server is listening')
     parser.add_argument('--dev', type=str, nargs='*', required=False,
                         help='The interfaces to restrict to')
-    parser.add_argument('--regex',type=str, required=False,
+    parser.add_argument('--dev-regex',type=str, required=False,
                         help='A regex to match interfaces')
     parser.add_argument('--debug',action='store_true',
                         help='Run Flask in debug mode')
@@ -23,7 +23,7 @@ def parse_arguments():
 
 def add_rule(interface, delay, loss, duplicate, reorder, corrupt, rate):
     # remove old setup
-    command = 'tc qdisc del dev %s root netem' % interface
+    command = 'tc qdisc del dev %s root' % interface
     command = command.split(' ')
     proc = subprocess.Popen(command)
     proc.wait()
@@ -44,14 +44,13 @@ def add_rule(interface, delay, loss, duplicate, reorder, corrupt, rate):
         command += ' reorder %s%%' % reorder
     if corrupt != '':
         command += ' corrupt %s%%' % corrupt
-    print(command)
     command = command.split(' ')
     proc = subprocess.Popen(command)
     proc.wait()
     return redirect(url_for('main'))
     
 def del_rule(interface):
-    command = 'tc qdisc del dev %s root netem' % interface
+    command = 'tc qdisc del dev %s root' % interface
     command = command.split(' ')
     proc = subprocess.Popen(command)
     proc.wait()
@@ -101,7 +100,7 @@ def remove_rules():
 def get_active_rules():
     proc = subprocess.Popen(['tc', 'qdisc'], stdout=subprocess.PIPE)
     output = proc.communicate()[0].decode()
-    lines = output.split('\n')[:-1]
+    lines = output.strip().split('\n')
     rules = []
     seen_dev = []
     for line in lines:
@@ -155,8 +154,8 @@ if __name__ == "__main__":
     #if os.geteuid() != 0:
     #    exit("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
     args = parse_arguments()
-    if args.regex:
-        pattern = re.compile(args.regex)
+    if args.dev_regex:
+        pattern = re.compile(args.dev_regex)
     if args.dev:
         dev_list = args.dev
     app_args={}
