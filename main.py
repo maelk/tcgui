@@ -21,21 +21,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-@app.route("/")
-def main():
-    rules = get_active_rules()
-    return render_template('main.html', rules=rules)
-
-
-@app.route('/new_rule/<interface>', methods=['POST'])
-def new_rule(interface):
-    delay = request.form['Delay']
-    loss = request.form['Loss']
-    duplicate = request.form['Duplicate']
-    reorder = request.form['Reorder']
-    corrupt = request.form['Corrupt']
-    rate = request.form['Rate']
-
+def add_rule(interface, delay, loss, duplicate, reorder, corrupt, rate):
     # remove old setup
     command = 'tc qdisc del dev %s root netem' % interface
     command = command.split(' ')
@@ -60,16 +46,53 @@ def new_rule(interface):
     command = command.split(' ')
     proc = subprocess.Popen(command)
     proc.wait()
-    return redirect(url_for('main'))
-
-
-@app.route('/remove_rule/<interface>', methods=['POST'])
-def remove_rule(interface):
-    # remove old setup
+    
+def del_rule(interface):
     command = 'tc qdisc del dev %s root netem' % interface
     command = command.split(' ')
     proc = subprocess.Popen(command)
     proc.wait()
+    
+@app.route("/")
+def main():
+    rules = get_active_rules()
+    return render_template('main.html', rules=rules)
+
+
+@app.route('/modify-rule/<interface>', methods=['POST'])
+def modify_rule(interface):
+    delay = request.form['Delay']
+    loss = request.form['Loss']
+    duplicate = request.form['Duplicate']
+    reorder = request.form['Reorder']
+    corrupt = request.form['Corrupt']
+    rate = request.form['Rate']
+    add_rule(interface, delay, loss, duplicate, reorder, corrupt, rate)
+    return redirect(url_for('main'))
+
+@app.route('/delete-rule/<interface>', methods=['POST'])
+def remove_rule(interface):
+    # remove old setup
+    del_rule(interface)
+    return redirect(url_for('main'))
+    
+@app.route('/modify-rules', methods=['POST'])
+def modify_rules():
+    delay = request.form['Delay']
+    loss = request.form['Loss']
+    duplicate = request.form['Duplicate']
+    reorder = request.form['Reorder']
+    corrupt = request.form['Corrupt']
+    rate = request.form['Rate']
+    for rule in get_active_rules():
+        add_rule(rule['name'], delay, loss, duplicate, reorder, corrupt, rate)
+    return redirect(url_for('main'))
+    
+@app.route('/delete-rules', methods=['POST'])
+def remove_rules():
+    # remove old setup
+    for rule in get_active_rules():
+        del_rule(rule['name'])
     return redirect(url_for('main'))
 
 def get_active_rules():
@@ -77,24 +100,24 @@ def get_active_rules():
     output = proc.communicate()[0].decode()
     lines = output.split('\n')[:-1]
     rules = []
-    dev = set()
+    seen_dev = []
     for line in lines:
         arguments = line.split(' ')
         rule = parse_rule(arguments)
-        if rule['name'] and rule['name'] not in dev:
+        if rule['name'] and rule['name'] not in seen_dev:
             rules.append(rule)
-            dev.add(rule['name'])
+            seen_dev.append(rule['name'])
     return rules
 
 
 def parse_rule(splitted_rule):
     rule = {'name':      None,
-            'rate':      None,
-            'delay':     None,
-            'loss':      None,
-            'duplicate': None,
-            'reorder':   None,
-            'corrupt':   None}
+            'rate':      '',
+            'delay':     '',
+            'loss':      '',
+            'duplicate': '',
+            'reorder':   '',
+            'corrupt':   ''}
     i = 0
     for argument in splitted_rule:
         if argument == 'dev':
@@ -112,15 +135,15 @@ def parse_rule(splitted_rule):
         elif argument == 'rate':
             rule['rate'] = splitted_rule[i + 1].split('Mbit')[0]
         elif argument == 'delay':
-            rule['delay'] = splitted_rule[i + 1]
+            rule['delay'] = splitted_rule[i + 1].split('ms')[0]
         elif argument == 'loss':
-            rule['loss'] = splitted_rule[i + 1]
+            rule['loss'] = splitted_rule[i + 1].split('%')[0]
         elif argument == 'duplicate':
-            rule['duplicate'] = splitted_rule[i + 1]
+            rule['duplicate'] = splitted_rule[i + 1].split('%')[0]
         elif argument == 'reorder':
-            rule['reorder'] = splitted_rule[i + 1]
+            rule['reorder'] = splitted_rule[i + 1].split('%')[0]
         elif argument == 'corrupt':
-            rule['corrupt'] = splitted_rule[i + 1]
+            rule['corrupt'] = splitted_rule[i + 1].split('%')[0]
         i += 1
     return rule
 

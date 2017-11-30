@@ -1,60 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>DemoSetup</title>
-</head>
-<body>
-<h4>Available Interfaces</h4>
-<ul>
-    {% for rule in rules %}
-        <li>
-            {{ rule['name'] }}
-            <form method="POST" action="{{ url_for('new_rule', interface=rule['name']) }}">
-                <table border="1">
-                    <tr>
-                        <th>Name</th>
-                        <th>Current Value</th>
-                        <th>New Value</th>
-                    </tr>
-                    <tr>
-                        <td>Rate:</td>
-                        <td>{{ rule['rate'] }}</td>
-                        <td><input type="text" name="Rate" size="5"> in Mbit</td>
-                    </tr>
-                    <tr>
-                        <td>Delay:</td>
-                        <td>{{ rule['delay'] }}</td>
-                        <td><input type="text" name="Delay" size="5"> in ms</td>
-                    </tr>
-                    <tr>
-                        <td>Loss:</td>
-                        <td>{{ rule['loss'] }}</td>
-                        <td><input type="text" name="Loss" size="5"> in %</td>
-                    </tr>
-                    <tr>
-                        <td>Duplicate:</td>
-                        <td>{{ rule['duplicate'] }}</td>
-                        <td><input type="text" name="Duplicate" size="5"> in %</td>
-                    </tr>
-                    <tr>
-                        <td>Reorder:</td>
-                        <td>{{ rule['reorder'] }}</td>
-                        <td><input type="text" name="Reorder" size="5"> in %</td>
-                    </tr>
-                    <tr>
-                        <td>Corrupt</td>
-                        <td>{{ rule['corrupt'] }}</td>
-                        <td><input type="text" name="Corrupt" size="5"> in %</td>
-                    </tr>
-                </table>
-                <input type="submit" value="Apply Rules">
-            </form>
-            <form method="POST" action="{{ url_for('remove_rule', interface= rule['name']) }}">
-                <input type="submit" value="Remove Rules">
-            </form>
-        </li>
-    {% endfor %}
-</ul>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <title>DemoSetup</title>
+    </head>
+    <body>
+
+        <h3>Interfaces settings</h3>
+        <table border="1">
+            <tr>
+                <th>Interface</th>
+                <th>Rate</th>
+                <th>Delay</th>
+                <th>Loss</th>
+                <th>Duplicate</th>
+                <th>Reorder</th>
+                <th>Corrupt</th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th></th>
+                <th>Mbit</th>
+                <th>ms</th>
+                <th>%</th>
+                <th>%</th>
+                <th>%</th>
+                <th>%</th>
+                <th></th>
+                <th></th>
+            </tr>
+            {% for rule in rules %}
+            <tr>
+                <td>{{ rule['name'] }}</td>
+                <form method="POST" action="{{ url_for('modify_rule', interface=rule['name']) }}">
+                    <td><input type="text" name="Rate" size="5" value="{{ rule['rate'] }}"></td>
+                    <td><input type="text" name="Delay" size="5" value="{{ rule['delay'] }}"></td>
+                    <td><input type="text" name="Loss" size="5" value="{{ rule['loss'] }}"></td>
+                    <td><input type="text" name="Duplicate" size="5" value="{{ rule['duplicate'] }}"></td>
+                    <td><input type="text" name="Reorder" size="5" value="{{ rule['reorder'] }}"></td>
+                    <td><input type="text" name="Corrupt" size="5" value="{{ rule['corrupt'] }}"></td>
+                    <td><input type="submit" value="Apply rule"></td>
+                </form>
+                <form method="POST" action="{{ url_for('remove_rule', interface= rule['name']) }}">
+                    <td><input type="submit" value="Remove rule"></td>
+                </form>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td><b>All</b></td>
+                <form method="POST" action="{{ url_for('modify_rules') }}">
+                    <td><input type="text" name="Rate" size="5"></td>
+                    <td><input type="text" name="Delay" size="5"></td>
+                    <td><input type="text" name="Loss" size="5"></td>
+                    <td><input type="text" name="Duplicate" size="5"></td>
+                    <td><input type="text" name="Reorder" size="5"></td>
+                    <td><input type="text" name="Corrupt" size="5"></td>
+                    <td><input type="submit" value="Apply rules" style="font-weight: bold;"></td>
+                </form>
+                <form method="POST" action="{{ url_for('remove_rules') }}">
+                    <td><input type="submit" value="Remove rules" style="font-weight: bold;"></td>
+                </form>
+            </tr>
+        </table>
+
+    </body>
 </html>
